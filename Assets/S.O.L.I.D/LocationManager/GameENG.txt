@@ -1,0 +1,37 @@
+{
+"IDBJugar" : "New Game",
+"IDBSalir" : "Exit",
+"IDBAtras" : "Back",
+"IDBOpciones" : "Options",
+"IDBSonido" : "Sound",
+"IDBIdioma" : "Language",
+"IDBCastellano" : "Spanish",
+"IDBIngles" : "English",
+"IDBZona" : "Testing area",
+"IDBVolumen" : "Volume",
+"IDBIntegrante" : "Member Matias Nicolas Romano",
+"IDBReanudar" : "Resume",
+"IDBRestablecer" : "restore",
+"IDBRecompensa" : "You acquired a reward poster",
+"IDBTutorial_N1" : "Shift for running",
+"IDBTutorial_N2" : "W A S D to move",
+"IDBTutorial_N3" : "Left click - Attack
+
+Right click - defense",
+"IDBMision" : "Mission: go to tengu and finish your training",
+"IDBPantalla" : "Full Screen",
+"IDBPantalla2" : "Screen",
+"IDBControles" : "Controls",
+"IDBAjustes" : "Settings",
+"IDBResolucion" : "Resolution",
+
+"IDBMove" : "Move",
+"IDBInteract" : "Interact",
+"IDBDisparar" : "Shoot",
+"IDBDefender" : "Defend",
+"IDBAttack" : "Attack",
+
+
+
+
+}
