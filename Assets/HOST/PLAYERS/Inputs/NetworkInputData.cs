@@ -6,6 +6,8 @@ public struct NetworkInputData : INetworkInput
     public bool jumpInput;
     public bool double_jumpInput;
     public bool fire_shoot;
+
+
     public Vector3 pos;
     public NetworkBool isFirePressed;
     public NetworkButtons networkButtons;

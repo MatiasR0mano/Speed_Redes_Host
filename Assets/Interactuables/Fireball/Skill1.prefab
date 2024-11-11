@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 9112357445277293142}
   - component: {fileID: 600456244260457796}
-  - component: {fileID: 297802608509322492}
-  - component: {fileID: 2999848812929365300}
   - component: {fileID: 5663209148109252166}
   - component: {fileID: 5238115169958578589}
+  - component: {fileID: 297802608509322492}
+  - component: {fileID: 2999848812929365300}
   - component: {fileID: 2357657393565576244}
   - component: {fileID: 2089701840142446119}
   m_Layer: 7
@@ -90,42 +90,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &297802608509322492
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2739464124156022645}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 129fa73f903e1d544b2d43f4c0256cc6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  count: 0
-  _skill_prefab: {fileID: 297802608509322492}
-  habil: 1
-  _net_rb2D: {fileID: 5238115169958578589}
-  _lifeTime: 0
---- !u!114 &2999848812929365300
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2739464124156022645}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SortKey: 2951764288
-  ObjectInterest: 1
-  Flags: 262145
-  NestedObjects: []
-  NetworkedBehaviours:
-  - {fileID: 297802608509322492}
-  - {fileID: 5238115169958578589}
 --- !u!50 &5663209148109252166
 Rigidbody2D:
   serializedVersion: 4
@@ -175,6 +139,42 @@ MonoBehaviour:
     Position: 0.01
     Rotation: 0.01
     Scale: 0.01
+--- !u!114 &297802608509322492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2739464124156022645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 129fa73f903e1d544b2d43f4c0256cc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  count: 0
+  _skill_prefab: {fileID: 297802608509322492}
+  habil: 1
+  _net_rb2D: {fileID: 5238115169958578589}
+  _lifeTime: 0
+--- !u!114 &2999848812929365300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2739464124156022645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 2951764288
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 5238115169958578589}
+  - {fileID: 297802608509322492}
 --- !u!58 &2357657393565576244
 CircleCollider2D:
   m_ObjectHideFlags: 0

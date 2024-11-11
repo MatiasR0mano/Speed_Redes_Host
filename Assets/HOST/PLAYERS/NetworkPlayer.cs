@@ -1,10 +1,7 @@
 using Fusion;
 using Fusion.Addons.Physics;
 using System.Collections;
-using System.Security.Cryptography;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static Cinemachine.AxisState;
 
 [RequireComponent(typeof(LocalInputs))]
 public class NetworkPlayer : NetworkBehaviour
@@ -12,7 +9,6 @@ public class NetworkPlayer : NetworkBehaviour
     public static NetworkPlayer Local { get; private set; }
     public LocalInputs Inputs { get; private set; }
 
-    NetworkInputData _inputData;
 
     public NetworkRigidbody2D _net_rb2D;
     public bool controlEnabled = true, ganador;
@@ -59,6 +55,8 @@ public class NetworkPlayer : NetworkBehaviour
         if (HasInputAuthority)
         {
             if (Camera.main.TryGetComponent(out Camera_Follow follow)) follow.CameraCine(this);
+            Gamemanager.instance.AddToList(this);
+            Cambio_color(Runner.LocalPlayer);
         }
         camara = Camera.main;
         Inputs = GetComponent<LocalInputs>();
@@ -73,22 +71,6 @@ public class NetworkPlayer : NetworkBehaviour
             Inputs.enabled = false;
         }
     }
-
-    //public void Movement2D(float move)
-    //{
-    //    if (controlEnabled)
-    //    {
-    //        velocity2.x = Input.GetAxisRaw("Horizontal");
-    //        if (!_slide)
-    //        {
-    //            Vector3 speed_move = new Vector3(move, _net_rb2D.Rigidbody.velocity.y);
-    //            _net_rb2D.Rigidbody.velocity = Vector3.SmoothDamp(_net_rb2D.Rigidbody.velocity, speed_move, ref velocity, _smooth_move);
-    //        }
-    //        if (move > 0.01f) spriteRenderer.flipX = false;
-    //        else if (move < -0.01f) spriteRenderer.flipX = true;
-    //    }
-    //    else velocity2.x = 0f;
-    //}
 
     private void Update()
     {
@@ -114,7 +96,6 @@ public class NetworkPlayer : NetworkBehaviour
         {
             Vector3 _moveDirection = transform.right * (velocity2.x = move * _speed * Runner.DeltaTime);
             _net_rb2D.Rigidbody.velocity = Vector3.SmoothDamp(_net_rb2D.Rigidbody.position, _moveDirection, ref velocity, _smooth_move);
-            Debug.Log("move");
             if (move > 0.01f)
             {
                 spriteRenderer.flipX = false;
@@ -124,6 +105,10 @@ public class NetworkPlayer : NetworkBehaviour
             {
                 spriteRenderer.flipX = true;
                 controll_wall.position = new Vector2(transform.position.x - 0.5f, transform.position.y);
+            }
+            else
+            {
+                velocity = Vector3.zero;
             }
 
         }
@@ -140,7 +125,12 @@ public class NetworkPlayer : NetworkBehaviour
             }
             else if (input) stopJump = true;
 
-            if (input && _inWall && _slide) JumpWall2D();
+            if (input && _inWall && _slide)
+            {
+                Debug.Log("muro");
+                JumpWall2D();
+            }
+
         }
     }
 
@@ -203,11 +193,6 @@ public class NetworkPlayer : NetworkBehaviour
 
     public void GravityPlayer()
     {
-        //if (velocity2.y < 0) velocity2 += gravityModifier * Runner.DeltaTime * Physics2D.gravity;
-        //else velocity2 += Runner.DeltaTime * Physics2D.gravity;
-
-        //velocity2 += gravityModifier * Runner.DeltaTime * Physics2D.gravity;
-
         velocity2 += Runner.DeltaTime * Physics2D.gravity * 10;
 
         velocity2.x = targetVelocity.x;
@@ -242,32 +227,51 @@ public class NetworkPlayer : NetworkBehaviour
             velocity2.y += (jumpTakeOffSpeed * 1.2f) * (jumpModifier * 1.2f);
             double_jump = false;
             stop_double_jump = true;
-            Debug.Log("se cumple double model");
         }
         else if (stopJump)
         {
             stopJump = false;
             if (velocity2.y > 0) velocity2.y *= jumpDeceleration;
         }
-        targetVelocity = velocity2 * _speed;
     }
     public void move_desde_aca()
     {
         targetVelocity = velocity2 * _speed;
     }
 
-    public void CheckJumpWall2D()
+    public void CheckJumpWall2D(float input)
     {
-        Debug.Log("CheckJumpWall2D");
 
-        _slide = !Grounded && _inWall && move_horizontal != 0 ? _slide = true : _slide = false;
-        gravityModifier = _slide ? gravityModifier = .3f : gravityModifier = 1f;
+        if (!Grounded && _inWall && input != 0)
+        {
+            _slide = true;
+            Debug.Log("slide funca");
+
+        }
+        else
+        {
+            _slide = false;
+            Debug.Log("slide no funca");
+        }
+        if (_slide)
+        {
+            gravityModifier = 0.3f;
+            Debug.Log("cambio gravedad");
+        }
+        else
+        {
+            gravityModifier = 1f;
+            Debug.Log("no cambio gravedad");
+
+        }
         _inWall = Physics2D.OverlapBox(controll_wall.position, shell_wall, 0f, Wall);
-        targetVelocity = velocity2 * _speed;
+        //targetVelocity = velocity2 * _speed;
+        Debug.Log("Slide " + _slide);
     }
 
     public void JumpWall2D()
     {
+        Debug.Log("jumpWall2D");
         _inWall = false;
         if (spriteRenderer.flipX)
             _net_rb2D.Rigidbody.velocity = new Vector2(_strengthJump_WallX * -move_horizontal, velocity2.y = _strengthJump_WallY);
@@ -302,7 +306,7 @@ public class NetworkPlayer : NetworkBehaviour
         Physics2D.IgnoreLayerCollision(8, 9, true);
         _speed = 0;
         yield return new WaitForSeconds(time_enable);
-        _speed = 20;
+        _speed = 50;
         Physics2D.IgnoreLayerCollision(8, 9, false);
     }
 
@@ -326,7 +330,7 @@ public class NetworkPlayer : NetworkBehaviour
                 foreach (Collider2D hitcollider in hit)
                 {
                     interact = hitcollider.GetComponent<Iinteract>();
-                    interact.interact(this);
+                    interact.RPC_interact(Runner.LocalPlayer, this);
                 }
                 break;
         }

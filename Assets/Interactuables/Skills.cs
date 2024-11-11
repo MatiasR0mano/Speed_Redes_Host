@@ -11,7 +11,8 @@ public abstract class Skills : NetworkBehaviour, Iinteract
     public NetworkRigidbody2D _net_rb2D;
     public abstract void Habilidad(NetworkPlayer player);
 
-    public void interact(NetworkPlayer player)
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_interact([RpcTarget] PlayerRef player_rpc,NetworkPlayer player)
     {
         if (!habil)
         {

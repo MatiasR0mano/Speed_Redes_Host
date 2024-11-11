@@ -22,6 +22,10 @@ public class LocalInputs : MonoBehaviour
         {
             _inputData.fire_shoot = true;
         }
+        else
+        {
+            _inputData.fire_shoot = false;
+        }
 
 
         if (Input.GetKey(KeyCode.W) && player.Grounded)
@@ -34,19 +38,23 @@ public class LocalInputs : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.W) && !player.Grounded && player.jumpState == JumpState.InFlight)
         {
-            Debug.Log("se cumple double");
             _inputData.double_jumpInput = true;
         }
-        else
+        if (!Input.GetKeyDown(KeyCode.W) && player.stop_double_jump)
         {
             _inputData.double_jumpInput = false;
+
         }
+        //else
+        //{
+        //    _inputData.double_jumpInput = false;
+        //}
     }
 
     public NetworkInputData GetLocalInputs()
     {
-        _inputData.fire_shoot = _isFirePressed;
-        _isFirePressed = false;
+        //_inputData.fire_shoot = _isFirePressed;
+        //_isFirePressed = false;
 
         //_inputData.jumpInput = false;
         return _inputData;

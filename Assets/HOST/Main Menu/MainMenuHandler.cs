@@ -8,6 +8,7 @@ public class MainMenuHandler : MonoBehaviour
 {
     [SerializeField] NetworkRunnerHandler _networkRunnerHandler;
 
+    [SerializeField] GameObject _fondo;
     [Header("Panels")]
     [SerializeField] GameObject _initialPanel;
     [SerializeField] GameObject _statusPanel;
@@ -42,6 +43,7 @@ public class MainMenuHandler : MonoBehaviour
     {
         _initialPanel.SetActive(false);
         _statusPanel.SetActive(true);
+        _fondo.SetActive(true);
 
         _networkRunnerHandler.JoinLobby();
 

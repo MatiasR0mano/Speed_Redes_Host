@@ -18,6 +18,11 @@ public class PlayerController : NetworkBehaviour
 
         player.Rotation_AIM(player.aim, inputs.pos);
 
-        if (player.skill != null && inputs.isFirePressed) player.Habilidad_Skill();
+        if (player.skill != null && inputs.fire_shoot)
+        {
+            player.Habilidad_Skill();
+        }
+
+        player.CheckJumpWall2D(inputs.movementInput);
     }
 }

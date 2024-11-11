@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 6683202492628314093}
   - component: {fileID: 5309514272865189452}
   - component: {fileID: 7507907602228408364}
+  - component: {fileID: 5964294941880972777}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -190,6 +191,7 @@ MonoBehaviour:
   - {fileID: 5507146458982448356}
   - {fileID: 6683202492628314093}
   - {fileID: 7507907602228408364}
+  - {fileID: 5964294941880972777}
 --- !u!114 &7052349560290518911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -246,15 +248,15 @@ MonoBehaviour:
     m_Bits: 64
   controll_wall: {fileID: 8013869887687071544}
   shell_wall: {x: 1, y: 4.81, z: 0}
-  _strengthJump_WallX: 0
-  _strengthJump_WallY: 0
-  _timeJump_Wall: 0
-  _strengthDamage_Y: 0
-  _strengthDamage_X: 0
+  _strengthJump_WallX: 0.037
+  _strengthJump_WallY: 27
+  _timeJump_Wall: 1
+  _strengthDamage_Y: 3
+  _strengthDamage_X: 2.5
   cooldown_damage_max: 1.2
   skill: {fileID: 0}
-  damage_rebote: {x: 0, y: 0}
-  time_enable: 0
+  damage_rebote: {x: 5, y: 6}
+  time_enable: 0.85
   cooldown_damage: 0
   interactuo: 0
   interact_mask:
@@ -322,6 +324,18 @@ MonoBehaviour:
     Position: 0.01
     Rotation: 0.01
     Scale: 0.01
+--- !u!114 &5964294941880972777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4273831644181931138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fae58bf0176b80c48829a06501418976, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4363832576892843429
 GameObject:
   m_ObjectHideFlags: 0

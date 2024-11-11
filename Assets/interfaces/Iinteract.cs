@@ -1,4 +1,6 @@
+using Fusion;
+
 public interface Iinteract
 {
-    public void interact(NetworkPlayer player);
+    public void RPC_interact([RpcTarget] PlayerRef player_rpc, NetworkPlayer player);
 }

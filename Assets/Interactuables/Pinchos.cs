@@ -3,5 +3,6 @@ using UnityEngine;
 
 public class Pinchos : NetworkBehaviour, Iinteract
 {
-    public void interact(NetworkPlayer player) => player.TakeDamage();
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_interact([RpcTarget] PlayerRef player_rpc, NetworkPlayer player) => player.TakeDamage();
 }

@@ -7,16 +7,11 @@ public enum JumpState
 {
     Grounded, PrepareToJump, Jumping, InFlight, Landed
 }
-public enum Estados
-{
-    Idle, AIM,
-}
 
 public class Player2 : NetworkBehaviour
 {
     [SerializeField] NetworkRigidbody2D _net_rb2D;
     public bool controlEnabled = true, ganador;
-    public Estados states;
     public JumpState jumpState = JumpState.Grounded;
     Vector3 puntero;
     public Camera camara;
