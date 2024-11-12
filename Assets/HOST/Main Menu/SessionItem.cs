@@ -26,8 +26,8 @@ public class SessionItem : MonoBehaviour
         _mySessionInfo = session;
 
         _name.text = session.Name;
-        _playersAmount.text = $"{session.PlayerCount}/{session.MaxPlayers}";
-        _joinBtn.interactable = session.PlayerCount < session.MaxPlayers;
+        _playersAmount.text = $"{session.PlayerCount}/{2}";
+        _joinBtn.interactable = session.PlayerCount < 2;
     }
 
     void OnClick()

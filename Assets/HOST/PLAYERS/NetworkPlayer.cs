@@ -9,7 +9,7 @@ public class NetworkPlayer : NetworkBehaviour
     public static NetworkPlayer Local { get; private set; }
     public LocalInputs Inputs { get; private set; }
 
-
+    public Transform pos;
     public NetworkRigidbody2D _net_rb2D;
     public bool controlEnabled = true, ganador;
     public JumpState jumpState = JumpState.Grounded;
@@ -35,7 +35,7 @@ public class NetworkPlayer : NetworkBehaviour
     public LayerMask Wall;
     [SerializeField] Transform controll_wall;
     [SerializeField] Vector3 shell_wall;
-    bool _inWall, _slide, _jump_Wall;
+    public bool _inWall, _slide, _jump_Wall, takedamage;
     [SerializeField]
     float _strengthJump_WallX, _strengthJump_WallY, _timeJump_Wall, _strengthDamage_Y, _strengthDamage_X;
     public float cooldown_damage_max;
@@ -52,10 +52,10 @@ public class NetworkPlayer : NetworkBehaviour
 
     public override void Spawned()
     {
+        //Gamemanager.instance.AddToList(this);
         if (HasInputAuthority)
         {
             if (Camera.main.TryGetComponent(out Camera_Follow follow)) follow.CameraCine(this);
-            Gamemanager.instance.AddToList(this);
             Cambio_color(Runner.LocalPlayer);
         }
         camara = Camera.main;
@@ -99,25 +99,21 @@ public class NetworkPlayer : NetworkBehaviour
             if (move > 0.01f)
             {
                 spriteRenderer.flipX = false;
-                controll_wall.position = new Vector2(transform.position.x + 0.5f, transform.position.y);
+                controll_wall.position = new Vector2(transform.position.x + 1f, transform.position.y);
             }
             else if (move < -0.01f)
             {
                 spriteRenderer.flipX = true;
-                controll_wall.position = new Vector2(transform.position.x - 0.5f, transform.position.y);
+                controll_wall.position = new Vector2(transform.position.x - 1f, transform.position.y);
             }
-            else
-            {
-                velocity = Vector3.zero;
-            }
-
+            else velocity = Vector3.zero;
         }
     }
 
     public void Jump2D(bool input)
     {
         Jump = input;
-        if (controlEnabled)
+        if (controlEnabled && !takedamage)
         {
             if (jumpState == JumpState.Grounded && Jump)
             {
@@ -125,10 +121,10 @@ public class NetworkPlayer : NetworkBehaviour
             }
             else if (input) stopJump = true;
 
-            if (input && _inWall && _slide)
+            if (_inWall && _slide)
             {
                 Debug.Log("muro");
-                JumpWall2D();
+                JumpWall2D(input);
             }
 
         }
@@ -193,23 +189,30 @@ public class NetworkPlayer : NetworkBehaviour
 
     public void GravityPlayer()
     {
-        velocity2 += Runner.DeltaTime * Physics2D.gravity * 10;
+        if (_inWall)
+        {
+            velocity2 += Runner.DeltaTime * Physics2D.gravity;
 
-        velocity2.x = targetVelocity.x;
+        }
+        else
+        {
+            velocity2 += Runner.DeltaTime * Physics2D.gravity * 10;
+            velocity2.x = targetVelocity.x;
 
-        Grounded = false;
+            Grounded = false;
 
-        var deltaPosition = velocity2 * Runner.DeltaTime;
+            var deltaPosition = velocity2 * Runner.DeltaTime;
 
-        var moveAlongGround = new Vector2(groundNormal.y, -groundNormal.x);
+            var moveAlongGround = new Vector2(groundNormal.y, -groundNormal.x);
 
-        var move = moveAlongGround * deltaPosition.x;
+            var move = moveAlongGround * deltaPosition.x;
 
-        PerformMovement(move, false);
+            PerformMovement(move, false);
 
-        move = Vector2.up * deltaPosition.y;
+            move = Vector2.up * deltaPosition.y;
 
-        PerformMovement(move, true);
+            PerformMovement(move, true);
+        }
     }
 
     public void Jump_model(bool input, bool input_double)
@@ -218,13 +221,15 @@ public class NetworkPlayer : NetworkBehaviour
         double_jump = input_double;
         if (Jump && Grounded)
         {
-            velocity2.y = jumpTakeOffSpeed * jumpModifier;
+            if (!_inWall) velocity2.y = jumpTakeOffSpeed * jumpModifier;
+            else velocity2.y = 0;
             stop_double_jump = false;
             Jump = false;
         }
         if (double_jump && !Grounded && !stop_double_jump)
         {
-            velocity2.y += (jumpTakeOffSpeed * 1.2f) * (jumpModifier * 1.2f);
+            if (!_inWall) velocity2.y += (jumpTakeOffSpeed * 1.2f) * (jumpModifier * 1.2f);
+            else velocity2.y = 0;
             double_jump = false;
             stop_double_jump = true;
         }
@@ -241,54 +246,35 @@ public class NetworkPlayer : NetworkBehaviour
 
     public void CheckJumpWall2D(float input)
     {
-
-        if (!Grounded && _inWall && input != 0)
+        if (!Grounded && _inWall)
         {
             _slide = true;
-            Debug.Log("slide funca");
-
         }
         else
         {
             _slide = false;
-            Debug.Log("slide no funca");
         }
-        if (_slide)
+        _inWall = Physics2D.OverlapBox(controll_wall.position, shell_wall, 0f, Wall);
+    }
+
+    public void JumpWall2D(bool input)
+    {
+        _inWall = false;
+
+        if (spriteRenderer.flipX)
         {
-            gravityModifier = 0.3f;
-            Debug.Log("cambio gravedad");
+            _net_rb2D.Rigidbody.velocity = new Vector2(_strengthJump_WallX * -velocity2.x, velocity2.y = _strengthJump_WallY);
+            Debug.Log("jumpWall2D");
+
         }
         else
         {
-            gravityModifier = 1f;
-            Debug.Log("no cambio gravedad");
-
+            _net_rb2D.Rigidbody.velocity = new Vector2(_strengthJump_WallX * velocity2.x, velocity2.y = _strengthJump_WallY);
         }
-        _inWall = Physics2D.OverlapBox(controll_wall.position, shell_wall, 0f, Wall);
-        //targetVelocity = velocity2 * _speed;
-        Debug.Log("Slide " + _slide);
-    }
-
-    public void JumpWall2D()
-    {
-        Debug.Log("jumpWall2D");
-        _inWall = false;
-        if (spriteRenderer.flipX)
-            _net_rb2D.Rigidbody.velocity = new Vector2(_strengthJump_WallX * -move_horizontal, velocity2.y = _strengthJump_WallY);
-        else _net_rb2D.Rigidbody.velocity = new Vector2(_strengthJump_WallX * move_horizontal, velocity2.y = _strengthJump_WallY);
-        StartCoroutine(ChangeJumpWall2D());
-    }
-
-    IEnumerator ChangeJumpWall2D()
-    {
-        _jump_Wall = true;
-        yield return new WaitForSeconds(_timeJump_Wall);
-        _jump_Wall = false;
     }
 
     public void Rotation_AIM(GameObject aim, Vector3 mouse)
     {
-        Debug.Log("ROTATION");
         puntero = camara.ScreenToWorldPoint(mouse);
         float angleRad = Mathf.Atan2(puntero.y - aim.transform.position.y, puntero.x - aim.transform.position.x);
         float angleGrad = (180 / Mathf.PI) * angleRad - 90;
@@ -297,16 +283,27 @@ public class NetworkPlayer : NetworkBehaviour
 
     public void Rebote()
     {
-        if (!spriteRenderer.flipX) _net_rb2D.Rigidbody.velocity = new Vector2(-damage_rebote.x * _strengthDamage_X, velocity2.y = damage_rebote.y);
-        else _net_rb2D.Rigidbody.velocity = new Vector2(damage_rebote.x * _strengthDamage_X, velocity2.y = damage_rebote.y);
+        if (!spriteRenderer.flipX)
+        {
+            _net_rb2D.Rigidbody.velocity = new Vector2(0, velocity2.y = damage_rebote.y);
+        }
+        else
+        {
+            _net_rb2D.Rigidbody.velocity = new Vector2(0, velocity2.y = damage_rebote.y);
+        }
     }
 
     public IEnumerator Lose_controll()
     {
         Physics2D.IgnoreLayerCollision(8, 9, true);
         _speed = 0;
+        velocity2.y = 0;
+        targetVelocity.y = 0;
+        takedamage = true;
+        Debug.Log("control");
         yield return new WaitForSeconds(time_enable);
         _speed = 50;
+        takedamage = false;
         Physics2D.IgnoreLayerCollision(8, 9, false);
     }
 
@@ -338,35 +335,17 @@ public class NetworkPlayer : NetworkBehaviour
 
     public void Cambio_color(PlayerRef player)
     {
-        if (player == Runner.LocalPlayer)
-        {
-            spriteRenderer.color = Color.cyan;
-        }
-        else
-        {
-            spriteRenderer.color = Color.red;
-        }
+        if (player == Runner.LocalPlayer) spriteRenderer.color = Color.cyan;
+        else spriteRenderer.color = Color.red;
     }
 
     public void Habilidad_Skill()
     {
-        Debug.Log("bola de fuego");
         Runner.Spawn(skill, verdadero_aim.transform.position, verdadero_aim.transform.rotation);
         skill.Habilidad(this);
         skill = null;
         aim.SetActive(false);
     }
-
-    //public void Revancha() => Gamemanager.instance.revancha.Add(this);
-
-    //private void OnApplicationQuit()
-    //{
-    //    Gamemanager.instance.RemoveFromList(Runner.LocalPlayer);
-    //    Gamemanager.instance.players2.Remove(this);
-    //}
-
-
-
 
     private void OnDrawGizmos()
     {

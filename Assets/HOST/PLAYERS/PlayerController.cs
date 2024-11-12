@@ -5,6 +5,11 @@ public class PlayerController : NetworkBehaviour
 {
     public NetworkPlayer player;
 
+    public override void Spawned()
+    {
+        Gamemanager.instance.RPC_AddToList(player);
+    }
+
 
     public override void FixedUpdateNetwork()
     {
@@ -14,14 +19,11 @@ public class PlayerController : NetworkBehaviour
         player.UpdateJumpState(inputs.jumpInput);
         player.Jump2D(inputs.jumpInput);
 
-        player.Move2D(inputs.movementInput);
+        if (!player._inWall && !player.takedamage) player.Move2D(inputs.movementInput);
 
         player.Rotation_AIM(player.aim, inputs.pos);
 
-        if (player.skill != null && inputs.fire_shoot)
-        {
-            player.Habilidad_Skill();
-        }
+        if (player.skill != null && inputs.fire_shoot) player.Habilidad_Skill();
 
         player.CheckJumpWall2D(inputs.movementInput);
     }

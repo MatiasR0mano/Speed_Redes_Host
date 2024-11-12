@@ -7,11 +7,26 @@ using System;
 public class Player_Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] NetworkPrefabRef _playerPrefab;
+    public static Player_Spawner Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         if (runner.IsServer)
         {
-            runner.Spawn(_playerPrefab, null, null, player);
+            Vector3 newPosition = new Vector3();
+            Quaternion newRotation = new Quaternion();
+            if (Gamemanager.instance.players2.Count == 1)
+            {
+                newPosition = Gamemanager.instance._spawnTransforms[1].position;
+                newRotation = Gamemanager.instance._spawnTransforms[1].rotation;
+                Debug.Log("spaw1");
+            }
+
+            runner.Spawn(_playerPrefab, newPosition, newRotation, player);
         }
     }
 
