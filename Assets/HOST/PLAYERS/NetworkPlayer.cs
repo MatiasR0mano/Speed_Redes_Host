@@ -11,7 +11,7 @@ public class NetworkPlayer : NetworkBehaviour
 
     public Transform pos;
     public NetworkRigidbody2D _net_rb2D;
-    public bool controlEnabled = true, ganador;
+    public bool controlEnabled = true, ganador, i_am_host;
     public JumpState jumpState = JumpState.Grounded;
     Vector3 puntero;
     public Camera camara;
@@ -52,11 +52,16 @@ public class NetworkPlayer : NetworkBehaviour
 
     public override void Spawned()
     {
-        //Gamemanager.instance.AddToList(this);
+        //Gamemanager.instance.Add_player(this);
+        Gamemanager.instance.RPC_AddToList(this);
         if (HasInputAuthority)
         {
             if (Camera.main.TryGetComponent(out Camera_Follow follow)) follow.CameraCine(this);
             Cambio_color(Runner.LocalPlayer);
+        }
+        if (HasStateAuthority)
+        {
+            i_am_host = true;
         }
         camara = Camera.main;
         Inputs = GetComponent<LocalInputs>();

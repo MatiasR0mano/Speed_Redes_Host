@@ -5,12 +5,6 @@ public class PlayerController : NetworkBehaviour
 {
     public NetworkPlayer player;
 
-    public override void Spawned()
-    {
-        Gamemanager.instance.RPC_AddToList(player);
-    }
-
-
     public override void FixedUpdateNetwork()
     {
         if (!GetInput(out NetworkInputData inputs)) return;
