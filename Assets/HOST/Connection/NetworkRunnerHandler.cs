@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
@@ -17,28 +16,19 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
 
     public void JoinLobby()
     {
-        if (_currentRunner)
-            Destroy(_currentRunner.gameObject);
-
+        if (_currentRunner) Destroy(_currentRunner.gameObject);
         _currentRunner = Instantiate(_runnerPrefab);
-
         _currentRunner.AddCallbacks(this);
-
         JoinLobbyAsync();
     }
 
     async void JoinLobbyAsync()
     {
         var result = await _currentRunner.JoinSessionLobby(SessionLobby.Custom, "Normal Lobby");
-
-        if (!result.Ok)
-        {
-            Debug.LogError("[Custom Error] Unable to Join Lobby");
-        }
+        if (!result.Ok) Debug.LogError("[Custom Error] Unable to Join Lobby");
         else
         {
             Debug.Log("[Custom Msg] Joined Lobby");
-
             OnJoinedLobby();
         }
     }
@@ -64,14 +54,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             Scene = SceneRef.FromIndex(sceneIndex)
         });
 
-        if (!result.Ok) 
-        {
-            Debug.LogError("[Custom Error] Unable to Start Game");
-        }
-        else
-        {
-            Debug.Log("[Custom Msg] Game Started");
-        }
+        if (!result.Ok) Debug.LogError("[Custom Error] Unable to Start Game");
+        else Debug.Log("[Custom Msg] Game Started");
     }
 
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)

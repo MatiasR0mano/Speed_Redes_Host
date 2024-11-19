@@ -1,16 +1,13 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class NicknamesHandler : MonoBehaviour
 {
     public static NicknamesHandler Instance { get; private set; }
-
     [SerializeField] private NicknameItem _nicknameItemPrefab;
-    
     private List<NicknameItem> _allNicknames;
-    
+
     private void Awake()
     {
         if (Instance)
@@ -18,9 +15,7 @@ public class NicknamesHandler : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
-
         _allNicknames = new List<NicknameItem>();
     }
 
@@ -48,9 +43,6 @@ public class NicknamesHandler : MonoBehaviour
     //En un tipo de Update ejecutar el metodo de cada nickname para que se posicionen en base a su jugador
     private void LateUpdate()
     {
-        foreach (var nicknameItem in _allNicknames)
-        {
-            nicknameItem.UpdatePosition();
-        }
+        foreach (var nicknameItem in _allNicknames) nicknameItem.UpdatePosition();
     }
 }

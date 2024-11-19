@@ -4,6 +4,7 @@ public struct NetworkInputData : INetworkInput
 {
     public float movementInput;
     public bool jumpInput;
+    public bool jump_wall;
     public bool double_jumpInput;
     public bool fire_shoot;
 

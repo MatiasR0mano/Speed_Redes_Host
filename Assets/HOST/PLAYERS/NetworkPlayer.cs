@@ -1,7 +1,13 @@
 using Fusion;
 using Fusion.Addons.Physics;
+using System;
 using System.Collections;
 using UnityEngine;
+
+public enum JumpState
+{
+    Grounded, PrepareToJump, Jumping, InFlight, Landed
+}
 
 [RequireComponent(typeof(LocalInputs))]
 public class NetworkPlayer : NetworkBehaviour
@@ -18,27 +24,19 @@ public class NetworkPlayer : NetworkBehaviour
     public GameObject aim, verdadero_aim;
     [Header("Move2d")]
     public SpriteRenderer spriteRenderer;
-    public float move_horizontal;
-    public float _speed, _smooth_move;
-    public Vector3 velocity = Vector3.zero;
+    public float _speed;
     [Header("Jump2D")]
-    public Vector2 targetVelocity, velocity2;
-    protected Vector2 groundNormal;
-    protected ContactFilter2D contactFilter;
-    protected RaycastHit2D[] hitBuffer = new RaycastHit2D[16];
-
-    public bool Jump = false, Grounded = false, stopJump, double_jump, stop_double_jump;
-    public float minMoveDistance, shellRadius, minGroundNormalY, gravityModifier,
-        jumpTakeOffSpeed, jumpModifier, jumpDeceleration;
+    public bool Jump = false;
+    public bool Grounded = false, stopJump, double_jump, stop_double_jump;
+    public float jumpTakeOffSpeed, jumpModifier, jump_time;
 
     [Header("WallJump2D")]
     public LayerMask Wall;
-    [SerializeField] Transform controll_wall;
-    [SerializeField] Vector3 shell_wall;
+    [SerializeField] Transform controll_wall, controll_ground;
+    [SerializeField] Vector3 shell_wall, shell_ground;
+    public Vector2 strengthJump;
     public bool _inWall, _slide, _jump_Wall, takedamage;
-    [SerializeField]
-    float _strengthJump_WallX, _strengthJump_WallY, _timeJump_Wall, _strengthDamage_Y, _strengthDamage_X;
-    public float cooldown_damage_max;
+    public float cooldown_damage_max, jump_time_wall, _timeJump_Wall;
 
     public Skills skill;
 
@@ -48,21 +46,19 @@ public class NetworkPlayer : NetworkBehaviour
 
     Iinteract interact;
     public bool interactuo;
-    public LayerMask interact_mask;
+    public LayerMask interact_mask, ground_mask;
+
+    public event Action<float> OnMovement = delegate { };
 
     public override void Spawned()
     {
-        //Gamemanager.instance.Add_player(this);
         Gamemanager.instance.RPC_AddToList(this);
         if (HasInputAuthority)
         {
             if (Camera.main.TryGetComponent(out Camera_Follow follow)) follow.CameraCine(this);
             Cambio_color(Runner.LocalPlayer);
         }
-        if (HasStateAuthority)
-        {
-            i_am_host = true;
-        }
+        if (HasStateAuthority) i_am_host = true;
         camara = Camera.main;
         Inputs = GetComponent<LocalInputs>();
 
@@ -71,211 +67,151 @@ public class NetworkPlayer : NetworkBehaviour
             Local = this;
             Inputs.enabled = true;
         }
-        else
-        {
-            Inputs.enabled = false;
-        }
+        else Inputs.enabled = false;
     }
 
     private void Update()
     {
         if (controlEnabled)
         {
-            cooldown_damage = cooldown_damage <= cooldown_damage_max ? cooldown_damage += Runner.DeltaTime : cooldown_damage;
-            targetVelocity = Vector2.zero;
-            move_desde_aca();
+            cooldown_damage = cooldown_damage < cooldown_damage_max ? cooldown_damage += Runner.DeltaTime : cooldown_damage;
             Confirmar();
         }
     }
-    public override void FixedUpdateNetwork()
+
+    public void Move2D(float xAxi)
     {
         if (controlEnabled)
         {
-            GravityPlayer();
-            //CheckJumpWall2D();
-        }
-    }
-    public void Move2D(float move)
-    {
-        if (controlEnabled)
-        {
-            Vector3 _moveDirection = transform.right * (velocity2.x = move * _speed * Runner.DeltaTime);
-            _net_rb2D.Rigidbody.velocity = Vector3.SmoothDamp(_net_rb2D.Rigidbody.position, _moveDirection, ref velocity, _smooth_move);
-            if (move > 0.01f)
+            if (xAxi > 0.01f)
             {
                 spriteRenderer.flipX = false;
                 controll_wall.position = new Vector2(transform.position.x + 1f, transform.position.y);
             }
-            else if (move < -0.01f)
+            else if (xAxi < -0.01f)
             {
                 spriteRenderer.flipX = true;
                 controll_wall.position = new Vector2(transform.position.x - 1f, transform.position.y);
             }
-            else velocity = Vector3.zero;
+
+            if (xAxi != 0)
+            {
+                transform.right = Vector2.right * Mathf.Sign(xAxi);
+                _net_rb2D.Rigidbody.velocity += Vector2.right * (xAxi * _speed * 10 * Runner.DeltaTime);
+
+                if (Mathf.Abs(_net_rb2D.Rigidbody.velocity.x) > _speed)
+                {
+                    var velocity = Vector3.ClampMagnitude(_net_rb2D.Rigidbody.velocity, _speed);
+                    velocity.y = _net_rb2D.Rigidbody.velocity.y;
+                    _net_rb2D.Rigidbody.velocity = velocity;
+                }
+                OnMovement(xAxi);
+            }
+            else
+            {
+                var velocity = _net_rb2D.Rigidbody.velocity;
+                velocity.x = 0;
+                _net_rb2D.Rigidbody.velocity = velocity;
+                OnMovement(0);
+            }
         }
     }
 
     public void Jump2D(bool input)
     {
-        Jump = input;
-        if (controlEnabled && !takedamage)
+        if (controlEnabled)
         {
-            if (jumpState == JumpState.Grounded && Jump)
+            Jump = input;
+            if (!takedamage && !_inWall)
             {
-                jumpState = JumpState.PrepareToJump;
+                if (jumpState == JumpState.Grounded && Jump) jumpState = JumpState.PrepareToJump;
+                else if (input) stopJump = true;
             }
-            else if (input) stopJump = true;
-
-            if (_inWall && _slide)
-            {
-                Debug.Log("muro");
-                JumpWall2D(input);
-            }
-
+            if (_inWall) _net_rb2D.Rigidbody.gravityScale = 2f;
+            else _net_rb2D.Rigidbody.gravityScale = 5f;
         }
-    }
-
-    void PerformMovement(Vector2 move, bool yMovement)
-    {
-        var distance = move.magnitude;
-        if (distance > minMoveDistance)
-        {
-            var count = _net_rb2D.Rigidbody.Cast(move, contactFilter, hitBuffer, distance + shellRadius);
-            for (var i = 0; i < count; i++)
-            {
-                var currentNormal = hitBuffer[i].normal;
-                if (currentNormal.y > minGroundNormalY)
-                {
-                    Grounded = true;
-                    if (yMovement)
-                    {
-                        groundNormal = currentNormal;
-                        currentNormal.x = 0;
-                    }
-                }
-                if (Grounded)
-                {
-                    var projection = Vector2.Dot(velocity2, currentNormal);
-                    if (projection < 0) velocity2 -= projection * currentNormal;
-                }
-                else
-                {
-                    velocity2.x *= 0;
-                    velocity2.y = Mathf.Min(velocity2.y, 0);
-                }
-                var modifiedDistance = hitBuffer[i].distance - shellRadius;
-                distance = modifiedDistance < distance ? modifiedDistance : distance;
-            }
-        }
-        _net_rb2D.Rigidbody.position += move.normalized * distance;
     }
 
     public void UpdateJumpState(bool input)
     {
-        Jump = input;
-        Jump = false;
-        switch (jumpState)
+        if (controlEnabled)
         {
-            case JumpState.PrepareToJump:
-                jumpState = JumpState.Jumping;
-                Jump = true;
-                break;
-            case JumpState.Jumping:
-                if (!Grounded) jumpState = JumpState.InFlight;
-                break;
-            case JumpState.InFlight:
-                if (Grounded) jumpState = JumpState.Landed;
-                break;
-            case JumpState.Landed:
-                jumpState = JumpState.Grounded;
-                break;
-        }
-    }
-
-    public void GravityPlayer()
-    {
-        if (_inWall)
-        {
-            velocity2 += Runner.DeltaTime * Physics2D.gravity;
-
-        }
-        else
-        {
-            velocity2 += Runner.DeltaTime * Physics2D.gravity * 10;
-            velocity2.x = targetVelocity.x;
-
-            Grounded = false;
-
-            var deltaPosition = velocity2 * Runner.DeltaTime;
-
-            var moveAlongGround = new Vector2(groundNormal.y, -groundNormal.x);
-
-            var move = moveAlongGround * deltaPosition.x;
-
-            PerformMovement(move, false);
-
-            move = Vector2.up * deltaPosition.y;
-
-            PerformMovement(move, true);
+            Jump = input;
+            Jump = false;
+            switch (jumpState)
+            {
+                case JumpState.PrepareToJump:
+                    jumpState = JumpState.Jumping;
+                    Jump = true;
+                    break;
+                case JumpState.Jumping:
+                    if (!Grounded) jumpState = JumpState.InFlight;
+                    break;
+                case JumpState.InFlight:
+                    if (Grounded) jumpState = JumpState.Landed;
+                    break;
+                case JumpState.Landed:
+                    jumpState = JumpState.Grounded;
+                    break;
+            }
         }
     }
 
     public void Jump_model(bool input, bool input_double)
     {
-        Jump = input;
-        double_jump = input_double;
-        if (Jump && Grounded)
+        if (controlEnabled)
         {
-            if (!_inWall) velocity2.y = jumpTakeOffSpeed * jumpModifier;
-            else velocity2.y = 0;
-            stop_double_jump = false;
-            Jump = false;
+            _inWall = Physics2D.OverlapBox(controll_wall.position, shell_wall, 0f, Wall);
+            Jump = input;
+            double_jump = input_double;
+            jump_time = jump_time < 1f ? jump_time += Runner.DeltaTime : jump_time;
+            if (Jump && Grounded && jump_time >= 1f)
+            {
+                if (!_inWall) _net_rb2D.Rigidbody.AddForce(Vector2.up * jumpTakeOffSpeed, ForceMode2D.Impulse);
+                stop_double_jump = false;
+                Jump = false;
+                jump_time = 0f;
+            }
+            if (double_jump && !Grounded && !stop_double_jump && jump_time >= .25f)
+            {
+                if (!_inWall) _net_rb2D.Rigidbody.AddForce(Vector2.up * (jumpTakeOffSpeed * 1.2f) * (jumpModifier * 1.2f), ForceMode2D.Impulse);
+                double_jump = false;
+                stop_double_jump = true;
+                jump_time = 0f;
+            }
+            else if (stopJump) stopJump = false;
         }
-        if (double_jump && !Grounded && !stop_double_jump)
-        {
-            if (!_inWall) velocity2.y += (jumpTakeOffSpeed * 1.2f) * (jumpModifier * 1.2f);
-            else velocity2.y = 0;
-            double_jump = false;
-            stop_double_jump = true;
-        }
-        else if (stopJump)
-        {
-            stopJump = false;
-            if (velocity2.y > 0) velocity2.y *= jumpDeceleration;
-        }
-    }
-    public void move_desde_aca()
-    {
-        targetVelocity = velocity2 * _speed;
-    }
-
-    public void CheckJumpWall2D(float input)
-    {
-        if (!Grounded && _inWall)
-        {
-            _slide = true;
-        }
-        else
-        {
-            _slide = false;
-        }
-        _inWall = Physics2D.OverlapBox(controll_wall.position, shell_wall, 0f, Wall);
     }
 
     public void JumpWall2D(bool input)
     {
-        _inWall = false;
-
-        if (spriteRenderer.flipX)
+        _jump_Wall = input;
+        _timeJump_Wall = _timeJump_Wall < .8f ? _timeJump_Wall += Runner.DeltaTime : _timeJump_Wall;
+        if (_jump_Wall && _inWall && _timeJump_Wall >= .8f)
         {
-            _net_rb2D.Rigidbody.velocity = new Vector2(_strengthJump_WallX * -velocity2.x, velocity2.y = _strengthJump_WallY);
-            Debug.Log("jumpWall2D");
+            if (spriteRenderer.flipX)
+            {
+                StartCoroutine(Jump_Wall());
+                _net_rb2D.Rigidbody.velocity = new Vector2(strengthJump.x, strengthJump.y);
+                _timeJump_Wall = 0f;
+            }
+            else
+            {
+                StartCoroutine(Jump_Wall());
+                _net_rb2D.Rigidbody.velocity = new Vector2(-strengthJump.x, strengthJump.y);
+                _timeJump_Wall = 0f;
+            }
+        }
+    }
 
-        }
-        else
-        {
-            _net_rb2D.Rigidbody.velocity = new Vector2(_strengthJump_WallX * velocity2.x, velocity2.y = _strengthJump_WallY);
-        }
+    public IEnumerator Jump_Wall()
+    {
+        spriteRenderer.flipX = spriteRenderer.flipX ? spriteRenderer.flipX = false : spriteRenderer.flipX = true;
+        _speed = 0f;
+        takedamage = true;
+        yield return new WaitForSeconds(.5f);
+        _speed = 20f;
+        takedamage = false;
     }
 
     public void Rotation_AIM(GameObject aim, Vector3 mouse)
@@ -286,28 +222,13 @@ public class NetworkPlayer : NetworkBehaviour
         aim.transform.rotation = Quaternion.Euler(0, 0, angleGrad);
     }
 
-    public void Rebote()
-    {
-        if (!spriteRenderer.flipX)
-        {
-            _net_rb2D.Rigidbody.velocity = new Vector2(0, velocity2.y = damage_rebote.y);
-        }
-        else
-        {
-            _net_rb2D.Rigidbody.velocity = new Vector2(0, velocity2.y = damage_rebote.y);
-        }
-    }
-
     public IEnumerator Lose_controll()
     {
         Physics2D.IgnoreLayerCollision(8, 9, true);
         _speed = 0;
-        velocity2.y = 0;
-        targetVelocity.y = 0;
         takedamage = true;
-        Debug.Log("control");
         yield return new WaitForSeconds(time_enable);
-        _speed = 50;
+        _speed = 20;
         takedamage = false;
         Physics2D.IgnoreLayerCollision(8, 9, false);
     }
@@ -317,14 +238,16 @@ public class NetworkPlayer : NetworkBehaviour
         if (cooldown_damage >= cooldown_damage_max)
         {
             StartCoroutine(Lose_controll());
-            Rebote();
-            cooldown_damage = 0;
+            if (spriteRenderer.flipX) _net_rb2D.Rigidbody.velocity = new Vector2(damage_rebote.x, damage_rebote.y);
+            else _net_rb2D.Rigidbody.velocity = new Vector2(-damage_rebote.x, damage_rebote.y);
+            cooldown_damage = 0f;
         }
     }
 
     public void Confirmar()
     {
         interactuo = Physics2D.OverlapBox(controll_wall.position, shell_wall, 0f, interact_mask);
+        Grounded = Physics2D.OverlapBox(controll_ground.position, shell_ground, 0f, ground_mask);
         switch (interactuo)
         {
             case true:
@@ -336,6 +259,7 @@ public class NetworkPlayer : NetworkBehaviour
                 }
                 break;
         }
+
     }
 
     public void Cambio_color(PlayerRef player)
@@ -348,14 +272,17 @@ public class NetworkPlayer : NetworkBehaviour
     {
         Runner.Spawn(skill, verdadero_aim.transform.position, verdadero_aim.transform.rotation);
         skill.Habilidad(this);
-        skill = null;
-        aim.SetActive(false);
+        //skill = null;
+        //aim.SetActive(false);
     }
+
+    public void TeleportPlayer() => _net_rb2D.Teleport(pos.position);
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(controll_wall.position, shell_wall);
+        Gizmos.DrawWireCube(controll_ground.position, shell_ground);
     }
 
 }

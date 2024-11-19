@@ -122,6 +122,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8013869887687071544}
+  - {fileID: 8813750492889780840}
   - {fileID: 1493193793472400897}
   - {fileID: 4989117298466343733}
   m_Father: {fileID: 0}
@@ -204,10 +205,10 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 1.5
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -218,7 +219,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 7
+  m_Constraints: 4
 --- !u!114 &7507907602228408364
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -266,54 +267,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 423f3a93ee609ca4ab4cefea9229c574, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pos: {fileID: 0}
   _net_rb2D: {fileID: 7507907602228408364}
   controlEnabled: 1
   ganador: 0
+  i_am_host: 0
   jumpState: 0
   camara: {fileID: 0}
   aim: {fileID: 6706837841811188359}
   verdadero_aim: {fileID: 6383579888211881185}
   spriteRenderer: {fileID: 8114232547711291605}
-  move_horizontal: 0
-  _speed: 50
-  _smooth_move: 0.19
-  velocity: {x: 0, y: 0, z: 0}
-  targetVelocity: {x: 0, y: 0}
-  velocity2: {x: 0, y: 0}
+  _speed: 20
   Jump: 0
   Grounded: 0
   stopJump: 0
   double_jump: 0
   stop_double_jump: 0
-  minMoveDistance: 0.001
-  shellRadius: 0.5
-  minGroundNormalY: 0.65
-  gravityModifier: 1
-  jumpTakeOffSpeed: 50
+  jumpTakeOffSpeed: 30
   jumpModifier: 0.8
-  jumpDeceleration: 0.9
+  jump_time: 0
   Wall:
     serializedVersion: 2
     m_Bits: 64
   controll_wall: {fileID: 8013869887687071544}
-  shell_wall: {x: 3.16, y: 4, z: 0}
+  controll_ground: {fileID: 8813750492889780840}
+  shell_wall: {x: 1, y: 3, z: 0}
+  shell_ground: {x: 1.3, y: 0.5, z: 0}
+  strengthJump: {x: 15, y: 25}
   _inWall: 0
   _slide: 0
   _jump_Wall: 0
-  _strengthJump_WallX: 1.8
-  _strengthJump_WallY: 50
-  _timeJump_Wall: 1
-  _strengthDamage_Y: 500
-  _strengthDamage_X: 500
+  takedamage: 0
   cooldown_damage_max: 1.2
+  jump_time_wall: 0
+  _timeJump_Wall: 1
   skill: {fileID: 0}
-  damage_rebote: {x: 800, y: 50}
+  damage_rebote: {x: 10, y: 25}
   time_enable: 1
   cooldown_damage: 0
   interactuo: 0
   interact_mask:
     serializedVersion: 2
     m_Bits: 128
+  ground_mask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!114 &6683202492628314093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,6 +363,37 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 7562620154140557367}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5625850641654696366
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8813750492889780840}
+  m_Layer: 9
+  m_Name: Grounded
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8813750492889780840
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5625850641654696366}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.05, y: -2.22, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []

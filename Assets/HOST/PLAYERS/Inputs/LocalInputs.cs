@@ -16,7 +16,8 @@ public class LocalInputs : MonoBehaviour
 
     void Update()
     {
-        _inputData.movementInput = Input.GetAxisRaw("Horizontal");
+        //_inputData.movementInput = Input.GetAxisRaw("Horizontal");
+        _inputData.movementInput = Input.GetAxis("Horizontal");
         _inputData.pos = Input.mousePosition;
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
@@ -36,6 +37,17 @@ public class LocalInputs : MonoBehaviour
         {
             _inputData.jumpInput = false;
         }
+
+
+        if (Input.GetKey(KeyCode.W) && player._inWall)
+        {
+            _inputData.jump_wall = true;
+        }
+        else
+        {
+            _inputData.jump_wall = false;
+
+        }
         if (Input.GetKeyDown(KeyCode.W) && !player.Grounded && player.jumpState == JumpState.InFlight)
         {
             _inputData.double_jumpInput = true;
@@ -45,10 +57,6 @@ public class LocalInputs : MonoBehaviour
             _inputData.double_jumpInput = false;
 
         }
-        //else
-        //{
-        //    _inputData.double_jumpInput = false;
-        //}
     }
 
     public NetworkInputData GetLocalInputs()

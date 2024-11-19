@@ -17,12 +17,12 @@ public class Gamemanager : NetworkBehaviour
     public bool comenzar, start_game, teleport;
     int index;
     public Transform[] _spawnTransforms;
+    public Transform[] spawn_initial;
     public List<Toggle> _aceptar_toggle;
     void Awake()
     {
         instance = this;
         _players = new List<PlayerRef>();
-        //_start.SetActive(true);
         _aceptar.onClick.AddListener(RPC_Aceptar);
         _aceptar.onClick.AddListener(Desactivar);
         _aceptar.interactable = false;
@@ -44,9 +44,14 @@ public class Gamemanager : NetworkBehaviour
             start_game = false;
             StartCoroutine(Cuenta_atras());
         }
-        if (players2[0].pos != null && players2[1].pos != null && !teleport)
+    }
+
+    public override void FixedUpdateNetwork()
+    {
+        if (_aceptar_toggle[0].isOn && _aceptar_toggle[1].isOn && !teleport)
         {
-            RPC_Teleport();
+            RPC_Start();
+            for (int i = 0; i < players2.Count; i++) players2[i].TeleportPlayer();
             teleport = true;
         }
     }
@@ -57,12 +62,8 @@ public class Gamemanager : NetworkBehaviour
     public void RPC_AddToList(NetworkPlayer player)
     {
         var playerRef = player.Object.StateAuthority;
-        //if (_players.Contains(playerRef)) return;
-
         _players.Add(playerRef);
         players2.Add(player);
-        //_start.SetActive(false);
-        //player.controlEnabled = false;
         if (players2.Count == 2) _aceptar.interactable = true;
         else _aceptar.interactable = false;
     }
@@ -71,7 +72,6 @@ public class Gamemanager : NetworkBehaviour
     {
         _players.Remove(player);
         if (!Object.HasInputAuthority) Runner.Disconnect(Object.InputAuthority);
-
         Runner.Despawn(Object);
     }
 
@@ -114,11 +114,10 @@ public class Gamemanager : NetworkBehaviour
     }
     #endregion
 
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_Teleport()
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_Start()
     {
         _start.SetActive(false);
-        Debug.Log("teleport");
         start_game = true;
     }
 
@@ -144,29 +143,19 @@ public class Gamemanager : NetworkBehaviour
         Ready();
         if (players2[0].pos != null && players2[0].i_am_host)
         {
-            if (_aceptar_toggle[0].isOn)
-            {
-                _aceptar_toggle[1].isOn = true;
-                players2[1].pos = _spawnTransforms[1];
-            }
+            if (_aceptar_toggle[0].isOn) _aceptar_toggle[1].isOn = true;
             else
             {
                 players2[1].controlEnabled = false;
-
                 _aceptar_toggle[0].isOn = true;
             }
         }
         if (players2[0].pos != null && !players2[0].i_am_host)
         {
-            if (_aceptar_toggle[1].isOn)
-            {
-                _aceptar_toggle[0].isOn = true;
-                players2[0].pos = _spawnTransforms[0];
-            }
+            if (_aceptar_toggle[1].isOn) _aceptar_toggle[0].isOn = true;
             else
             {
                 players2[1].controlEnabled = false;
-
                 _aceptar_toggle[1].isOn = true;
             }
         }
@@ -177,11 +166,13 @@ public class Gamemanager : NetworkBehaviour
         if (!players2[index].i_am_host)
         {
             players2[index].pos = _spawnTransforms[0];
+            players2[1].pos = _spawnTransforms[1];
             players2[index].controlEnabled = false;
         }
         if (players2[index].i_am_host)
         {
             players2[index].pos = _spawnTransforms[1];
+            players2[1].pos = _spawnTransforms[0];
             players2[index].controlEnabled = false;
         }
         index = index < 2 ? index++ : index;

@@ -18,8 +18,7 @@ public abstract class Skills : NetworkBehaviour, Iinteract
         {
             player.skill = _skill_prefab;
             Runner.Despawn(Object);
-            if (player.HasInputAuthority)
-                player.aim.SetActive(true);
+            if (player.HasInputAuthority) player.aim.SetActive(true);
         }
         else player.TakeDamage();
     }

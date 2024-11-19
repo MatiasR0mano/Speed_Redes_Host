@@ -1,8 +1,6 @@
 using Fusion;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,23 +14,13 @@ public class BrowserHandler : MonoBehaviour
 
     [SerializeField] VerticalLayoutGroup _verticalLayout;
 
-    private void OnEnable()
-    {
-        _networkRunnerHandler.OnSessionListUpdate += UpdateList;
-    }
+    private void OnEnable() => _networkRunnerHandler.OnSessionListUpdate += UpdateList;
 
-    private void OnDisable()
-    {
-        _networkRunnerHandler.OnSessionListUpdate -= UpdateList;
-    }
+    private void OnDisable() => _networkRunnerHandler.OnSessionListUpdate -= UpdateList;
 
     void ClearBrowser()
     {
-        foreach (Transform session in _verticalLayout.transform)
-        {
-            Destroy(session.gameObject);
-        }
-
+        foreach (Transform session in _verticalLayout.transform) Destroy(session.gameObject);
         _statusText.gameObject.SetActive(false);
     }
 
@@ -40,16 +28,13 @@ public class BrowserHandler : MonoBehaviour
     {
         ClearBrowser();
 
-        if (sessions.Count == 0 ) 
+        if (sessions.Count == 0)
         {
             NoSessionsFound();
             return;
         }
 
-        foreach (SessionInfo session in sessions)
-        {
-            AddNewSessionToBrowser(session);
-        }
+        foreach (SessionInfo session in sessions) AddNewSessionToBrowser(session);
     }
 
     void NoSessionsFound()
@@ -65,8 +50,5 @@ public class BrowserHandler : MonoBehaviour
         sessionItem.OnSessionItemClick += JoinSelectedSession;
     }
 
-    void JoinSelectedSession(SessionInfo sessionInfo)
-    {
-        _networkRunnerHandler.JoinGame(sessionInfo);
-    }
+    void JoinSelectedSession(SessionInfo sessionInfo) => _networkRunnerHandler.JoinGame(sessionInfo);
 }
