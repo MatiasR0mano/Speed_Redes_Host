@@ -55,6 +55,14 @@ public class MainMenuHandler : MonoBehaviour
     void Btn_HostGame()
     {
         _hostGameBtn.interactable = false;
-        _networkRunnerHandler.HostGame(_sessionNameField.text, "Level_1");
+        var rand = Random.Range(0, 2);
+        if (rand == 0)
+        {
+            _networkRunnerHandler.HostGame(_sessionNameField.text, "Level_1");
+        }
+        else if (rand == 1)
+        {
+            _networkRunnerHandler.HostGame(_sessionNameField.text, "Level_2");
+        }
     }
 }

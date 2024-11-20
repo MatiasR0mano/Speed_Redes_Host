@@ -50,8 +50,12 @@ public class NetworkPlayer : NetworkBehaviour
 
     public event Action<float> OnMovement = delegate { };
 
+
+    bool permito_irme;
+
     public override void Spawned()
     {
+        Physics2D.IgnoreLayerCollision(8, 9, true);
         Gamemanager.instance.RPC_AddToList(this);
         if (HasInputAuthority)
         {
@@ -268,15 +272,26 @@ public class NetworkPlayer : NetworkBehaviour
         else spriteRenderer.color = Color.red;
     }
 
-    public void Habilidad_Skill()
+    public void Habilidad_Skill(Transform aim2)
     {
-        Runner.Spawn(skill, verdadero_aim.transform.position, verdadero_aim.transform.rotation);
+        aim.SetActive(false);
         skill.Habilidad(this);
+        Runner.Spawn(skill, aim2.position, aim2.rotation);
         //skill = null;
-        //aim.SetActive(false);
     }
 
     public void TeleportPlayer() => _net_rb2D.Teleport(pos.position);
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_DisconnectPlayer(bool permito)
+    {
+        permito_irme = permito;
+        if (!Object.HasInputAuthority && permito_irme)
+        {
+            Runner.Disconnect(Object.InputAuthority);
+            Runner.Despawn(Object);
+            Debug.Log(permito_irme);
+        }
+    }
 
     private void OnDrawGizmos()
     {

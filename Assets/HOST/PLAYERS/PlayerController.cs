@@ -1,6 +1,5 @@
 using Fusion;
-using Unity.Burst.Intrinsics;
-using UnityEditor.Experimental.GraphView;
+using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -22,9 +21,13 @@ public class PlayerController : NetworkBehaviour
 
         if (player.skill != null && inputs.fire_shoot)
         {
-            player.Habilidad_Skill();
+            Debug.Log("desactivo");
+            player.Habilidad_Skill(player.verdadero_aim.transform);
             player.skill = null;
-            player.aim.SetActive(false);
         }
+        Debug.Log(inputs.permito_irme_a_la_m);
+        player.RPC_DisconnectPlayer(inputs.permito_irme_a_la_m);
     }
+
+
 }

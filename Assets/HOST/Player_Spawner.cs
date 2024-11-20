@@ -35,7 +35,12 @@ public class Player_Spawner : MonoBehaviour, INetworkRunnerCallbacks
         if (!NetworkPlayer.Local) return;
         input.Set(NetworkPlayer.Local.Inputs.GetLocalInputs());
     }
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) => runner.Shutdown();
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+    {
+        Debug.Log("slago");
+        Gamemanager.instance.RemoveFromList(runner.LocalPlayer);
+        runner.Shutdown();
+    }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
