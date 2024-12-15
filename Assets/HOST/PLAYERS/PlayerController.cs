@@ -26,7 +26,7 @@ public class PlayerController : NetworkBehaviour
             player.skill = null;
         }
         Debug.Log(inputs.permito_irme_a_la_m);
-        player.RPC_DisconnectPlayer(inputs.permito_irme_a_la_m);
+        player.RPC_F11(inputs.permito_irme_a_la_m);
     }
 
 

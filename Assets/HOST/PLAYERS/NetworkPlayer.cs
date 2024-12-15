@@ -46,12 +46,11 @@ public class NetworkPlayer : NetworkBehaviour
 
     Iinteract interact;
     public bool interactuo;
+    public bool permito_irme;
+    public bool permito_irme2;
     public LayerMask interact_mask, ground_mask;
 
     public event Action<float> OnMovement = delegate { };
-
-
-    bool permito_irme;
 
     public override void Spawned()
     {
@@ -281,8 +280,32 @@ public class NetworkPlayer : NetworkBehaviour
     }
 
     public void TeleportPlayer() => _net_rb2D.Teleport(pos.position);
+
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_DisconnectPlayer(bool permito)
+    {
+        //permito_irme = permito;
+        permito = true;
+        if (!i_am_host && permito)
+        {
+            Debug.Log("despawn");
+            Runner.Despawn(Object);
+        }
+        if (!Object.HasInputAuthority && permito)
+        {
+            Runner.Despawn(Object);
+            Runner.Disconnect(Object.InputAuthority);
+            Debug.Log("hasinput");
+        }
+        else
+        {
+            Debug.Log("Shutdown");
+            Runner.Shutdown();
+        }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_F11(bool permito)
     {
         permito_irme = permito;
         if (!Object.HasInputAuthority && permito_irme)
@@ -292,6 +315,8 @@ public class NetworkPlayer : NetworkBehaviour
             Debug.Log(permito_irme);
         }
     }
+
+
 
     private void OnDrawGizmos()
     {

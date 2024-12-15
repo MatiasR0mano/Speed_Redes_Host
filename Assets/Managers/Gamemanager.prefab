@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1053511747464365550}
   - component: {fileID: 5520406707418711915}
-  - component: {fileID: 5442919557907845781}
+  - component: {fileID: 6469603263507606401}
   m_Layer: 0
   m_Name: Gamemanager
   m_TagString: Untagged
@@ -46,12 +46,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _players: []
-  _players2: []
+  players2: []
+  _comenzar: {fileID: 0}
   _menu: {fileID: 0}
   _start: {fileID: 0}
   _winImage: {fileID: 0}
   _loseImage: {fileID: 0}
---- !u!114 &5442919557907845781
+  _mensaje_abandono: {fileID: 0}
+  one: {fileID: 0}
+  two: {fileID: 0}
+  three: {fileID: 0}
+  _volver_al_tittle: {fileID: 0}
+  _aceptar: {fileID: 0}
+  _cancelar: []
+  comenzar: 0
+  start_game: 0
+  teleport: 0
+  _spawnTransforms: []
+  spawn_initial: []
+  _aceptar_toggle: []
+  _irte: []
+--- !u!114 &6469603263507606401
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -63,9 +78,9 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 57688595
+  SortKey: 3808134074
   ObjectInterest: 1
-  Flags: 131073
+  Flags: 1
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 5520406707418711915}

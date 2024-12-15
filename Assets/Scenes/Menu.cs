@@ -1,9 +1,15 @@
+using Fusion;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Menu : MonoBehaviour
+public class Menu : NetworkBehaviour
 {
-    public void Nueva_partida(string nombreNivel) => SceneManager.LoadScene(nombreNivel);
+    public void Salir_partida()
+    {
+        SceneManager.LoadSceneAsync("Tittle_Screen");
+    }
 
     public void Salir() => Application.Quit();
+
+
 }

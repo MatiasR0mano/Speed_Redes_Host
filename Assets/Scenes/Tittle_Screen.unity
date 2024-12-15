@@ -1554,7 +1554,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1565677302}
         m_TargetAssemblyTypeName: Menu, Assembly-CSharp
         m_MethodName: Salir
         m_Mode: 1
@@ -1617,6 +1617,7 @@ GameObject:
   - component: {fileID: 1565677297}
   - component: {fileID: 1565677296}
   - component: {fileID: 1565677301}
+  - component: {fileID: 1565677302}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1731,6 +1732,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1565677302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1565677295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d961a3518f83e4d4e903db0a1b33e3d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1589127799
 GameObject:
   m_ObjectHideFlags: 0

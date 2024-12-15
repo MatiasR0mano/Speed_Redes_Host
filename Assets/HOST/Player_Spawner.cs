@@ -37,8 +37,6 @@ public class Player_Spawner : MonoBehaviour, INetworkRunnerCallbacks
     }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
-        Debug.Log("slago");
-        Gamemanager.instance.RemoveFromList(runner.LocalPlayer);
         runner.Shutdown();
     }
 

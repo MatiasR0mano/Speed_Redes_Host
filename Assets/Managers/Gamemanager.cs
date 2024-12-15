@@ -10,13 +10,17 @@ public class Gamemanager : NetworkBehaviour
     public List<PlayerRef> _players;
     public List<NetworkPlayer> players2;
     public static Gamemanager instance { get; private set; }
-    [SerializeField] GameObject _comenzar, _menu, _start, _winImage, _loseImage, _mensaje_abandono, one, two, three;
+    [SerializeField] GameObject _menu, _start, _winImage, _loseImage, _mensaje_abandono, one, two, three, _volver_al_tittle;
     [SerializeField] Button _aceptar;
+    public List<Button> _cancelar;
     public bool comenzar, start_game, teleport;
     int index;
     public Transform[] _spawnTransforms;
     public Transform[] spawn_initial;
     public List<Toggle> _aceptar_toggle;
+    public List<Toggle> _irte;
+
+
     void Awake()
     {
         instance = this;
@@ -24,6 +28,15 @@ public class Gamemanager : NetworkBehaviour
         _aceptar.onClick.AddListener(RPC_Aceptar);
         _aceptar.onClick.AddListener(Desactivar);
         _aceptar.interactable = false;
+
+        //_cancelar[0].onClick.AddListener(RPC_Anular_Partida2);
+
+
+
+        _cancelar[0].onClick.AddListener(RPC_mevoy);
+        _cancelar[1].onClick.AddListener(Runner_cosa);
+        _cancelar[2].onClick.AddListener(Runner_cosa);
+
     }
 
     private void Update()
@@ -42,6 +55,10 @@ public class Gamemanager : NetworkBehaviour
             start_game = false;
             StartCoroutine(Cuenta_atras());
         }
+        if (_irte[0].isOn || _irte[1].isOn)
+        {
+            RPC_Anular_Partida2();
+        }
     }
 
     public override void FixedUpdateNetwork()
@@ -52,9 +69,10 @@ public class Gamemanager : NetworkBehaviour
             for (int i = 0; i < players2.Count; i++) players2[i].TeleportPlayer();
             teleport = true;
         }
+
     }
 
-    #region todo lo que funca bien
+
 
     public void RPC_AddToList(NetworkPlayer player)
     {
@@ -63,11 +81,6 @@ public class Gamemanager : NetworkBehaviour
         players2.Add(player);
         if (players2.Count == 2) _aceptar.interactable = true;
         else _aceptar.interactable = false;
-    }
-
-    public void RemoveFromList(PlayerRef player)
-    {
-        _players.Remove(player);
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
@@ -86,22 +99,12 @@ public class Gamemanager : NetworkBehaviour
         }
     }
 
-    //[RpcTarget] El llamado del RPC va a ir dirigido a ese jugador para que no salte error tiene que tener el nombre RPC_
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_Win([RpcTarget] PlayerRef player, NetworkPlayer pla)
     {
         _menu.SetActive(true);
         if (players2[0].i_am_host && players2[0].ganador) Winner();
         if (!players2[0].i_am_host && players2[0].ganador) Winner();
-    }
-
-    public void Back_to_Tittle_Screen() => RPC_Anular_Partida2(Runner.LocalPlayer);
-
-    [Rpc]
-    public void RPC_Anular_Partida2([RpcTarget] PlayerRef player)
-    {
-        RemoveFromList(player);
-        SceneManager.LoadSceneAsync("Tittle_Screen");
     }
 
     void Winner()
@@ -117,7 +120,6 @@ public class Gamemanager : NetworkBehaviour
         players2[0].controlEnabled = false;
         players2[1].controlEnabled = false;
     }
-    #endregion
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     public void RPC_Start()
@@ -186,5 +188,39 @@ public class Gamemanager : NetworkBehaviour
     void Desactivar() => _aceptar.interactable = false;
 
 
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_mevoy()
+    {
+        if (players2[0].i_am_host)
+        {
+            if (_irte[0].isOn) _irte[1].isOn = true;
+            else
+            {
+                RPC_Anular_Partida2();
+                _irte[0].isOn = true;
+            }
+        }
+        if (!players2[0].i_am_host)
+        {
+            if (_irte[1].isOn) _irte[0].isOn = true;
+            else
+            {
+                RPC_Anular_Partida2();
+                _irte[1].isOn = true;
+            }
+        }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_Anular_Partida2()
+    {
+        _volver_al_tittle.SetActive(true);
+
+    }
+
+    public void Runner_cosa()
+    {
+        players2[0].Runner.Shutdown();
+    }
 
 }
