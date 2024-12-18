@@ -20,6 +20,11 @@ public class Gamemanager : NetworkBehaviour
     public List<Toggle> _aceptar_toggle;
     public List<Toggle> _irte;
 
+    public AudioSource audSource1;
+    public AudioSource audSource2;
+    public AudioClip clip1;
+    public AudioClip clip2;
+
 
     void Awake()
     {
@@ -130,6 +135,7 @@ public class Gamemanager : NetworkBehaviour
 
     public IEnumerator Cuenta_atras()
     {
+        audSource1.PlayOneShot(clip1);
         one.SetActive(true);
         yield return new WaitForSeconds(1.5f);
         one.SetActive(false);
@@ -139,6 +145,7 @@ public class Gamemanager : NetworkBehaviour
         three.SetActive(true);
         yield return new WaitForSeconds(1.5f);
         three.SetActive(false);
+        audSource2.Play();
         players2[0].controlEnabled = true;
         players2[1].controlEnabled = true;
         comenzar = true;

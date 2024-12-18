@@ -9,5 +9,6 @@ public class Meta : NetworkBehaviour, Iinteract
         gameObject.SetActive(false);
         Gamemanager.instance.RPC_Win(Runner.LocalPlayer, player);
         Gamemanager.instance.RPC_Defeat(Runner.LocalPlayer, player);
+        Gamemanager.instance.audSource1.PlayOneShot(Gamemanager.instance.clip2);
     }
 }

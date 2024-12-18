@@ -52,6 +52,10 @@ public class NetworkPlayer : NetworkBehaviour
 
     public event Action<float> OnMovement = delegate { };
 
+    //SFX
+    public AudioSource audSource;
+    public AudioClip[] audClips;
+
     public override void Spawned()
     {
         Physics2D.IgnoreLayerCollision(8, 9, true);
@@ -244,6 +248,7 @@ public class NetworkPlayer : NetworkBehaviour
             if (spriteRenderer.flipX) _net_rb2D.Rigidbody.velocity = new Vector2(damage_rebote.x, damage_rebote.y);
             else _net_rb2D.Rigidbody.velocity = new Vector2(-damage_rebote.x, damage_rebote.y);
             cooldown_damage = 0f;
+            RPC_PlayXsoundClip(3);
         }
     }
 
@@ -276,6 +281,7 @@ public class NetworkPlayer : NetworkBehaviour
         aim.SetActive(false);
         skill.Habilidad(this);
         Runner.Spawn(skill, aim2.position, aim2.rotation);
+        RPC_PlayXsoundClip(1);
         //skill = null;
     }
 
@@ -316,7 +322,13 @@ public class NetworkPlayer : NetworkBehaviour
         }
     }
 
+    //SFX try
 
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_PlayXsoundClip (int soundClip)
+    {
+        audSource.PlayOneShot(audClips[soundClip]);
+    }
 
     private void OnDrawGizmos()
     {

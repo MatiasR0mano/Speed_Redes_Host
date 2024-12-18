@@ -7,6 +7,7 @@ public class LocalInputs : MonoBehaviour
 
     bool _isJumpPressed;
     bool _isFirePressed;
+    bool doubleJumped = false;
     public NetworkPlayer player;
 
     void Start()
@@ -19,18 +20,41 @@ public class LocalInputs : MonoBehaviour
         _inputData.movementInput = Input.GetAxis("Horizontal");
         _inputData.pos = Input.mousePosition;
 
-        if (Input.GetKeyDown(KeyCode.Mouse0)) _inputData.fire_shoot = true;
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            _inputData.fire_shoot = true; 
+        }
         else _inputData.fire_shoot = false;
 
-        if (Input.GetKey(KeyCode.W) && player.Grounded) _inputData.jumpInput = true;
+        if (Input.GetKey(KeyCode.W) && player.Grounded)
+        { 
+            _inputData.jumpInput = true;
+            player.RPC_PlayXsoundClip(2);
+        }
         else _inputData.jumpInput = false;
 
-        if (Input.GetKey(KeyCode.W) && player._inWall) _inputData.jump_wall = true;
+        if (Input.GetKey(KeyCode.W) && player._inWall)
+        {
+            _inputData.jump_wall = true;
+            player.RPC_PlayXsoundClip(2);
+        }  
         else _inputData.jump_wall = false;
 
-        if (Input.GetKeyDown(KeyCode.W) && !player.Grounded && player.jumpState == JumpState.InFlight) _inputData.double_jumpInput = true;
+        if (Input.GetKeyDown(KeyCode.W) && !player.Grounded && player.jumpState == JumpState.InFlight && !doubleJumped)
+        {
+            _inputData.double_jumpInput = true;
+            doubleJumped = true;
 
-        if (!Input.GetKeyDown(KeyCode.W) && player.stop_double_jump) _inputData.double_jumpInput = false;
+            player.RPC_PlayXsoundClip(2);
+        }
+
+        //if (!Input.GetKeyDown(KeyCode.W) && player.stop_double_jump) _inputData.double_jumpInput = false;
+
+        if (player.Grounded)
+        {
+            doubleJumped = false;
+            _inputData.double_jumpInput = false;
+        }
     }
 
     public NetworkInputData GetLocalInputs()
